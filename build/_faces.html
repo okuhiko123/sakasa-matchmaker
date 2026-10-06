@@ -1,0 +1,177 @@
+<meta charset="utf-8"><title>face check</title>
+<style>
+body{margin:0;background:#14161f;color:#f6f1e8;font-family:system-ui;display:flex;flex-wrap:wrap;gap:8px;padding:12px}
+figure{margin:0;text-align:center;width:calc(50% - 6px)}
+svg.g{width:100%;height:auto;display:block}
+figcaption{font-size:13px;color:#cfc8bb;margin-top:-10px}
+</style>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="gSmoke" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#9b8fc4" stop-opacity="0"/>
+      <stop offset="55%" stop-color="#9b8fc4" stop-opacity=".5"/>
+      <stop offset="100%" stop-color="#b8aede" stop-opacity=".8"/>
+    </linearGradient>
+    <linearGradient id="gHanten" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#3c4a63"/>
+      <stop offset="100%" stop-color="#232c3e"/>
+    </linearGradient>
+    <radialGradient id="gSkin" cx="42%" cy="34%" r="78%">
+      <stop offset="0%" stop-color="#ffe2c6"/>
+      <stop offset="100%" stop-color="#f0bf96"/>
+    </radialGradient>
+    <linearGradient id="gSmoke2" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#cdc3ec" stop-opacity="0"/>
+      <stop offset="70%" stop-color="#cdc3ec" stop-opacity=".28"/>
+      <stop offset="100%" stop-color="#e2daff" stop-opacity=".45"/>
+    </linearGradient>
+    <radialGradient id="gGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#f6a96a" stop-opacity=".55"/>
+      <stop offset="100%" stop-color="#f6a96a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+</svg>
+<div id="out" style="display:contents"></div>
+<script>
+var GENIE = [
+'<ellipse cx="130" cy="124" rx="98" ry="104" fill="url(#gGlow)"/>',
+
+// ---- 下半身は煙。ランプから立ちのぼって人の形になる ----
+'<path d="M70 198 C34 240 94 250 64 280 C36 308 112 310 130 334 C148 310 224 308 196 280 C166 250 226 240 190 198 Z" fill="url(#gSmoke)"/>',
+'<path d="M96 204 C74 232 110 242 90 262 C72 280 116 290 130 310 C144 290 188 280 170 262 C150 242 186 232 164 204 Z" fill="url(#gSmoke2)"/>',
+'<path d="M106 216 C92 238 120 248 106 268" fill="none" stroke="#d8cfff" stroke-opacity=".3" stroke-width="2.4" stroke-linecap="round"/>',
+'<path d="M156 226 C168 244 144 252 156 272" fill="none" stroke="#d8cfff" stroke-opacity=".22" stroke-width="2.4" stroke-linecap="round"/>',
+
+// ---- 後ろ髪（肩下までのロング、毛先はうねって外へ） ----
+'<path d="M130 32 C72 32 42 76 46 132 C48 158 36 180 44 206 C52 194 60 190 70 184 C60 194 56 204 60 218 C74 204 86 192 90 172 C78 142 80 100 94 80 C110 58 150 58 166 80 C180 100 182 142 170 172 C174 192 186 204 200 218 C204 204 200 194 190 184 C200 190 208 194 216 206 C224 180 212 158 214 132 C218 76 188 32 130 32 Z" fill="#2a2235"/>',
+'<path d="M52 198 C62 186 70 172 73 154 C76 174 68 192 60 208 Z" fill="#413755"/>',
+'<path d="M208 198 C198 186 190 172 187 154 C184 174 192 192 200 208 Z" fill="#413755"/>',
+'<path d="M64 120 C58 148 60 172 66 192" fill="none" stroke="#413755" stroke-width="3" stroke-linecap="round"/>',
+'<path d="M196 120 C202 148 200 172 194 192" fill="none" stroke="#413755" stroke-width="3" stroke-linecap="round"/>',
+
+// ---- 胴（黒T） ----
+'<path d="M130 166 C96 166 72 186 66 216 C90 228 170 228 194 216 C188 186 164 166 130 166 Z" fill="#35353f"/>',
+'<path d="M108 169 C116 182 144 182 152 169 C146 164 113 164 108 169 Z" fill="#26262e"/>',
+'<path d="M110 172 C118 184 142 184 150 172" fill="none" stroke="#5a5a66" stroke-width="1.6"/>',
+
+// ---- 腕組み ----
+'<g id="gArms">',
+  '<path d="M78 204 C92 230 168 230 182 204 C192 222 172 242 130 242 C88 242 68 222 78 204 Z" fill="#40404b"/>',
+  '<path d="M96 232 C112 240 148 240 164 232" fill="none" stroke="#2a2a33" stroke-width="3" stroke-linecap="round"/>',
+  '<ellipse cx="108" cy="223" rx="15" ry="9.5" fill="#e8b98e" transform="rotate(-9 108 223)"/>',
+  '<path d="M96 221 C101 218 108 218 113 220" fill="none" stroke="#d2a176" stroke-width="1.6" stroke-linecap="round"/>',
+  '<ellipse cx="152" cy="215" rx="15" ry="9.5" fill="#f0c296" transform="rotate(9 152 215)"/>',
+  '<path d="M146 212 C151 210 158 211 163 214" fill="none" stroke="#d2a176" stroke-width="1.6" stroke-linecap="round"/>',
+'</g>',
+
+// ---- 首・耳・顔 ----
+'<rect x="117" y="150" width="26" height="26" rx="11" fill="#d8a377"/>',
+'<ellipse cx="78" cy="118" rx="8.5" ry="12.5" fill="#efbd92"/><ellipse cx="182" cy="118" rx="8.5" ry="12.5" fill="#efbd92"/>',
+'<ellipse cx="130" cy="113" rx="54" ry="57" fill="url(#gSkin)"/>',
+
+// ---- 前髪（広い額を残して、左右へ流れる） ----
+'<path d="M130 46 C96 46 74 68 72 104 C81 83 95 74 110 70 C119 68 126 72 130 79 C134 72 141 69 150 72 C166 77 179 86 188 104 C186 68 164 46 130 46 Z" fill="#2a2235"/>',
+'<path d="M76 94 C66 124 70 160 79 190 C83 160 75 128 86 102 Z" fill="#2a2235"/>',
+'<path d="M184 94 C194 124 190 160 181 190 C177 160 185 128 174 102 Z" fill="#2a2235"/>',
+'<path d="M99 76 C110 71 121 66 128 59" fill="none" stroke="#3a3250" stroke-width="2.2" stroke-linecap="round"/>',
+'<path d="M162 78 C171 84 178 91 183 100" fill="none" stroke="#3a3250" stroke-width="2" stroke-linecap="round"/>',
+
+// ---- 頬・鼻 ----
+'<ellipse cx="91" cy="131" rx="10" ry="6" fill="#dd8564" opacity=".38"/>',
+'<ellipse cx="169" cy="131" rx="10" ry="6" fill="#dd8564" opacity=".38"/>',
+'<path d="M130 110 Q126 118 132 120" fill="none" stroke="#c07e58" stroke-width="2.4" stroke-linecap="round"/>',
+
+// ---- 眉（太くて濃い） ----
+'<g id="gBrows" style="transition:transform .22s">',
+  '<path id="browL" d="M93 80 Q110 70 126 79" fill="none" stroke="#2a2235" stroke-width="5.6" stroke-linecap="round"/>',
+  '<path id="browR" d="M134 79 Q150 70 167 80" fill="none" stroke="#2a2235" stroke-width="5.6" stroke-linecap="round"/>',
+'</g>',
+
+// ---- 目 ----
+'<g class="face-layer on" id="eyesOpen"><g class="blink" id="blinker">',
+  '<ellipse cx="110" cy="105" rx="9" ry="8" fill="#fffaf3"/>',
+  '<ellipse cx="150" cy="105" rx="9" ry="8" fill="#fffaf3"/>',
+  '<g id="pupils" style="transition:transform .25s">',
+    '<circle cx="110" cy="105.4" r="5.6" fill="#241f2a"/><circle cx="108" cy="103.2" r="1.9" fill="#fff"/>',
+    '<circle cx="150" cy="105.4" r="5.6" fill="#241f2a"/><circle cx="148" cy="103.2" r="1.9" fill="#fff"/>',
+  '</g>',
+'</g></g>',
+'<g class="face-layer" id="eyesSmile">',
+  '<path d="M100 108 Q110 97 120 108" fill="none" stroke="#241f2a" stroke-width="4.6" stroke-linecap="round"/>',
+  '<path d="M140 108 Q150 97 160 108" fill="none" stroke="#241f2a" stroke-width="4.6" stroke-linecap="round"/>',
+'</g>',
+'<g class="face-layer" id="eyesShut">',
+  '<path d="M100 104 Q110 111 120 104" fill="none" stroke="#241f2a" stroke-width="4.4" stroke-linecap="round"/>',
+  '<path d="M140 104 Q150 111 160 104" fill="none" stroke="#241f2a" stroke-width="4.4" stroke-linecap="round"/>',
+'</g>',
+'<g class="face-layer" id="eyesWide">',
+  '<ellipse cx="110" cy="105" rx="11" ry="11" fill="#fffaf3"/>',
+  '<ellipse cx="150" cy="105" rx="11" ry="11" fill="#fffaf3"/>',
+  '<circle cx="110" cy="105.4" r="6" fill="#241f2a"/><circle cx="107.8" cy="102.8" r="2.2" fill="#fff"/>',
+  '<circle cx="150" cy="105.4" r="6" fill="#241f2a"/><circle cx="147.8" cy="102.8" r="2.2" fill="#fff"/>',
+'</g>',
+
+// ---- 黒ぶちの丸メガネ（いちばんの目印） ----
+'<g id="gGlasses">',
+  '<path d="M92 100 L76 96" fill="none" stroke="#17171b" stroke-width="3" stroke-linecap="round"/>',
+  '<path d="M168 100 L184 96" fill="none" stroke="#17171b" stroke-width="3" stroke-linecap="round"/>',
+  '<circle cx="110" cy="105" r="17.5" fill="none" stroke="#17171b" stroke-width="3.6"/>',
+  '<circle cx="150" cy="105" r="17.5" fill="none" stroke="#17171b" stroke-width="3.6"/>',
+  '<path d="M127.5 101 Q130 98 132.5 101" fill="none" stroke="#17171b" stroke-width="3.2" stroke-linecap="round"/>',
+  '<path d="M101 97 Q105 93 110 92.5" fill="none" stroke="#fff" stroke-opacity=".42" stroke-width="2.2" stroke-linecap="round"/>',
+  '<path d="M141 97 Q145 93 150 92.5" fill="none" stroke="#fff" stroke-opacity=".26" stroke-width="2.2" stroke-linecap="round"/>',
+'</g>',
+
+// ---- 口 ----
+'<g class="face-layer on" id="mNormal"><path d="M118 137 Q130 146 142 137" fill="none" stroke="#8f4b38" stroke-width="4" stroke-linecap="round"/></g>',
+'<g class="face-layer" id="mThink"><path d="M118 141 Q128 134 139 142" fill="none" stroke="#8f4b38" stroke-width="4" stroke-linecap="round"/></g>',
+'<g class="face-layer" id="mFlat"><path d="M118 139 L142 139" fill="none" stroke="#8f4b38" stroke-width="4" stroke-linecap="round"/></g>',
+'<g class="face-layer" id="mSmile">',
+  '<path d="M114 135 Q130 152 146 135 Z" fill="#7d3b2c"/>',
+  '<path d="M118 138 Q130 135 142 138 Q130 141 118 138 Z" fill="#fdf3e2"/>',
+'</g>',
+'<g class="face-layer" id="mGrin">',
+  '<path d="M110 133 Q130 160 150 133 Q130 140 110 133 Z" fill="#6f3225"/>',
+  '<path d="M112 134 Q130 140 148 134 Q130 145 112 134 Z" fill="#fdf3e2"/>',
+  '<path d="M120 136 L120 142 M130 137.5 L130 144 M140 136 L140 142" stroke="#e3d6c3" stroke-width="1"/>',
+  '<path d="M116 152 Q130 158 144 152 Q130 156 116 152 Z" fill="#c9705f"/>',
+'</g>',
+'<g class="face-layer" id="mOh"><ellipse cx="130" cy="142" rx="8.5" ry="11" fill="#7d3b2c"/><path d="M122 138 Q130 135 138 138 Q130 141 122 138 Z" fill="#fdf3e2"/></g>',
+
+// ---- 口ひげ（左右に広がる）と顎ひげ（あご下まで） ----
+'<path d="M107 126 C113 119 124 120 130 125 C136 120 147 119 153 126 C145 128 137 127 130 130 C123 127 115 128 107 126 Z" fill="#241f2c"/>',
+'<path d="M106 130 C104 142 107 152 112 159" fill="none" stroke="#241f2c" stroke-opacity=".26" stroke-width="3" stroke-linecap="round"/>',
+'<path d="M154 130 C156 142 153 152 148 159" fill="none" stroke="#241f2c" stroke-opacity=".26" stroke-width="3" stroke-linecap="round"/>',
+'<path d="M107 150 C110 166 118 177 130 179 C142 177 150 166 153 150 C148 163 141 169 130 169 C119 169 112 163 107 150 Z" fill="#241f2c"/>',
+'<path d="M120 167 C124 169 136 169 140 167" fill="none" stroke="#4a3f63" stroke-opacity=".6" stroke-width="1.5" stroke-linecap="round"/>'
+].join('');
+var FACES = {
+  normal:   { eyes: 'eyesOpen',  mouth: 'mNormal', brow: 0,    gaze: [0, 0] },
+  think:    { eyes: 'eyesOpen',  mouth: 'mThink',  brow: -2,   gaze: [4.5, -4.5] },
+  smile:    { eyes: 'eyesSmile', mouth: 'mSmile',  brow: -1.5, gaze: [0, 0] },
+  grin:     { eyes: 'eyesSmile', mouth: 'mGrin',   brow: -2.5, gaze: [0, 0] },
+  surprise: { eyes: 'eyesWide',  mouth: 'mOh',     brow: -5,   gaze: [0, 0] },
+  focus:    { eyes: 'eyesShut',  mouth: 'mFlat',   brow: 2,    gaze: [0, 0] },
+  warm:     { eyes: 'eyesOpen',  mouth: 'mSmile',  brow: -1,   gaze: [0, 1.5] }
+};
+var out = document.getElementById('out');
+Object.keys(FACES).forEach(function(name){
+  var fig = document.createElement('figure');
+  var svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.setAttribute('viewBox','0 0 260 332'); svg.setAttribute('class','g');
+  svg.innerHTML = GENIE;
+  fig.appendChild(svg);
+  var cap = document.createElement('figcaption'); cap.textContent = name;
+  fig.appendChild(cap); out.appendChild(fig);
+  var f = FACES[name];
+  ['eyesOpen','eyesSmile','eyesShut','eyesWide'].forEach(function(k){
+    var n = svg.querySelector('#'+k); if(n) n.classList.toggle('on', k===f.eyes);
+  });
+  ['mNormal','mThink','mFlat','mSmile','mGrin','mOh'].forEach(function(k){
+    var n = svg.querySelector('#'+k); if(n) n.classList.toggle('on', k===f.mouth);
+  });
+  svg.querySelector('#gBrows').setAttribute('transform','translate(0 '+f.brow+')');
+  svg.querySelector('#pupils').setAttribute('transform','translate('+f.gaze[0]+' '+f.gaze[1]+')');
+});
+</script>
+<style>.face-layer{opacity:0}.face-layer.on{opacity:1}</style>

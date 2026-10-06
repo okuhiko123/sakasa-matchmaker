@@ -1,0 +1,175 @@
+<meta charset="utf-8">
+<title>さかさマッチメーカー</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kurenaido&family=Zen+Maru+Gothic:wght@400;500;700&family=Lato:wght@400;700&display=swap">
+<link rel="stylesheet" href="app.css">
+
+<canvas id="dust" aria-hidden="true"></canvas>
+<div class="flash" id="flash" aria-hidden="true"></div>
+<canvas id="burstCanvas" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;z-index:55;pointer-events:none;display:none"></canvas>
+
+<div class="stage">
+
+  <div class="brand"><span class="dot"></span>さかさま不動産</div>
+
+  <!-- ======================= トップ ======================= -->
+  <section class="screen is-on" id="screen-intro">
+    <h1 class="intro-title"><span class="saka">さかさ</span>マッチメーカー</h1>
+    <p class="intro-sub">あなたの物件に合う人を占います</p>
+    <div class="intro-rule"></div>
+
+    <div class="intro-okuda">
+      <div class="speech" id="introSpeech"></div>
+      <svg class="genie" id="genieIntro" viewBox="0 0 280 348" role="img" aria-label="占い師オクダーマン"></svg>
+    </div>
+
+    <p class="intro-lead">いくつかの質問に答えるだけで、さかさま不動産に掲載されている人の中から、あなたの物件と相性がよさそうな人を占い師オクダーマンがご紹介します。</p>
+    <button class="btn-primary" id="btnStart">占ってもらう</button>
+    <p class="intro-meta"><b id="introCount">400</b> 名以上の掲載者から診断します</p>
+  </section>
+
+  <!-- ======================= 場所 ======================= -->
+  <section class="screen" id="screen-pref">
+    <div class="progress" id="progPref" aria-hidden="true"></div>
+    <div class="char-wrap">
+      <div class="bubble" id="prefBubble"><span class="murmur" id="prefMurmur">さて。</span><span id="prefQuestion">その物件、どのあたりにあるの？</span></div>
+      <svg class="genie" id="geniePref" viewBox="0 0 280 348" role="img" aria-label="占い師オクダーマン"></svg>
+    </div>
+    <div class="q-body">
+      <div class="pref-grid" id="prefGrid"></div>
+      <div class="q-foot">
+        <button class="linkish" id="prefBack">← ひとつ戻る</button>
+        <span class="q-hint" id="prefHint"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 質問 ======================= -->
+  <section class="screen" id="screen-quiz">
+    <div class="progress" id="prog" aria-hidden="true"></div>
+    <div class="char-wrap">
+      <div class="bubble" id="qBubble"><span class="murmur" id="qMurmur">ふむ。</span><span id="qText">質問</span></div>
+      <svg class="genie" id="genie" viewBox="0 0 280 348" role="img" aria-label="占い師オクダーマン"></svg>
+    </div>
+    <div class="q-body">
+      <div class="choices" id="choices"></div>
+      <div class="q-foot">
+        <button class="linkish" id="qBack">← ひとつ戻る</button>
+        <button class="linkish" id="qSkip">わからない →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= 占い中 ======================= -->
+  <section class="screen" id="screen-divine">
+    <svg class="divine-genie" id="genieDivine" viewBox="0 0 280 348" role="img" aria-label="占っているオクダーマン"></svg>
+    <p class="divine-text" id="divineText">むむむ……</p>
+  </section>
+
+  <!-- ======================= 結果 ======================= -->
+  <section class="screen" id="screen-result">
+    <div class="verdict">
+      <div class="verdict-okuda">
+        <svg class="genie mini" id="genieResult" viewBox="0 0 280 348" role="img" aria-label="占い師オクダーマン"></svg>
+        <div class="bubble sm" id="resultBubble">視えたわ。</div>
+      </div>
+      <h2 id="verdictText"></h2>
+      <p class="area-note" id="areaNote"></p>
+    </div>
+    <button class="btn-primary sm share-top" id="btnShareTop">結果をシェアする</button>
+    <div id="cards"></div>
+    <div id="pastWrap"></div>
+    <div class="result-foot">
+      <button class="btn-primary sm" id="btnShare">結果をシェアする</button>
+      <button class="btn-ghost" id="btnMore">ほかの候補も見る</button>
+      <details class="more-ways">
+        <summary>その他</summary>
+        <div class="more-ways-body">
+          <button class="btn-ghost" id="btnPast">すでに決まった人の例も見る</button>
+          <a class="btn-ghost as-link" href="https://sakasama-fudosan.com/lessee/" target="_blank" rel="noopener">さかさま不動産で自分で探す</a>
+          <button class="btn-ghost" id="btnAgain">もう一度はじめから占う</button>
+        </div>
+      </details>
+    </div>
+    <div class="copy-box" id="copyBox" style="display:none"></div>
+    <div class="answer-recap" id="recap"></div>
+  </section>
+
+  <!-- ======================= 利用規約 ======================= -->
+  <section class="screen" id="screen-terms">
+    <div class="terms-head">
+      <h2>利用規約</h2>
+      <button class="btn-ghost" id="termsBack">閉じる</button>
+    </div>
+    <div class="terms-body">
+      <p>「さかさマッチメーカー」（以下、本サービス）は、株式会社On-Coが運営する「さかさま不動産」の掲載情報をもとに、物件をお持ちの方と、その物件でやりたいことを持つ掲載者との出会いのきっかけをつくるものです。ご利用の前に以下をお読みください。</p>
+
+      <h3>1. 占い結果の位置づけ</h3>
+      <p>本サービスが示す「相性」や順位は、掲載者が公開している希望条件（エリア・賃料・広さ・用途など）と、ご入力いただいた物件の条件を機械的に照合した目安です。</p>
+      <ul>
+        <li>結果は契約の成立や成約を保証するものではありません。</li>
+        <li>実際の条件は、必ずご本人およびさかさま不動産の担当者とお話しのうえご確認ください。</li>
+        <li>掲載者の希望は変わることがあります。表示内容が最新である保証はありません。</li>
+      </ul>
+
+      <h3>2. 掲載者情報の取り扱い</h3>
+      <p>表示している氏名・写真・活動内容・希望条件は、さかさま不動産のウェブサイト上で公開されている情報をもとにしています。</p>
+      <ul>
+        <li>掲載者への連絡は、各掲載ページに用意された方法で行ってください。</li>
+        <li>掲載者の情報を、本サービスの趣旨以外の目的（営業・勧誘・名簿作成など）に利用することはご遠慮ください。</li>
+        <li>「物件が見つかりました」「募集を終了しました」と表示される方は、現在は物件を探していません。参考としてご覧ください。</li>
+      </ul>
+
+      <h3>3. ご入力いただいた内容</h3>
+      <p>質問への回答は、お使いの端末の中だけで処理しています。サーバーへの送信・保存・第三者への提供は行っていません。物件の住所や個人を特定できる情報の入力は求めていません。</p>
+
+      <h3>4. 免責</h3>
+      <p>本サービスの利用、または利用できなかったことによって生じた損害について、運営者は責任を負いかねます。掲載者とのやりとりや契約に関するトラブルについても、当事者間で解決いただくものとします。</p>
+
+      <h3>5. 変更について</h3>
+      <p>本サービスの内容および本規約は、予告なく変更・中止することがあります。</p>
+
+      <p class="updated">2026年10月3日 制定</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    掲載情報は <a href="https://sakasama-fudosan.com/lessee/" target="_blank" rel="noopener">さかさま不動産の掲載者一覧</a> より。<br>
+    占いはあくまで出会いのきっかけです。実際の条件はご本人とお話しください。<br>
+    <button class="foot-terms" id="openTerms">利用規約</button>
+  </footer>
+</div>
+
+<div class="sheet" id="shareSheet" hidden>
+  <div class="sheet-inner" role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+    <h2 id="shareTitle">結果をシェアする</h2>
+    <p class="sheet-lead">画像を大きく表示してスクリーンショットを撮るのが、いちばん確実です。（長押しや右クリックでの保存ができる端末もあります）</p>
+    <div class="share-preview">
+      <img id="shareImg" alt="占いの結果の画像">
+      <canvas id="shareCanvas" width="1080" height="1920" hidden></canvas>
+    </div>
+    <div class="mention-card">
+      <p class="mention-lead">投稿するときは、ぜひメンションしてください</p>
+      <button class="mention-tag" id="btnMention">@sakasama_fudosan</button>
+      <a class="mention-link" href="https://www.instagram.com/sakasama_fudosan/?hl=ja" target="_blank" rel="noopener">さかさま不動産のInstagramを開く</a>
+    </div>
+    <div class="sheet-foot">
+      <button class="btn-primary sm" id="btnShot">大きく表示してスクショする</button>
+      <button class="btn-ghost" id="btnShareNative" hidden>そのままシェアする</button>
+      <button class="btn-ghost" id="shareClose">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<div class="shot" id="shotView" hidden>
+  <img id="shotImg" alt="占いの結果">
+  <div class="shot-hint" id="shotHint">スクショしたら、タップで戻る</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="muni.js" charset="utf-8"></script>
+<script src="data.js" charset="utf-8"></script>
+<script src="app.js" charset="utf-8"></script>

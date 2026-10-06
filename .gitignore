@@ -1,0 +1,3 @@
+# 取得した生HTMLと元画像。再取得できるので持ち込まない
+build/_work/
+.DS_Store
