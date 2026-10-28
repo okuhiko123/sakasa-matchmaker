@@ -1,0 +1,529 @@
+<meta charset="utf-8">
+<title>さかさマッチメーカー 集計</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow, noarchive">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kurenaido&family=Zen+Maru+Gothic:wght@400;500;700&family=Lato:wght@400;700&display=swap">
+
+<style>
+:root {
+  --paper:   #f7f2e6;
+  --paper-2: #efe8d8;
+  --sumi:    #241f1c;
+  --sumi-2:  #5b534c;
+  --sumi-3:  #6e655d;
+  --hada:    #f2866f;
+  --hada-2:  #f9c3b4;
+  --sora:    #7fc3e3;
+  --sora-2:  #cbe7f4;
+  --ki:      #ffd84d;
+  --line:    rgba(36, 31, 28, 0.15);
+  --f-disp: "Zen Kurenaido", serif;
+  --f-body: "Zen Maru Gothic", "Hiragino Sans", sans-serif;
+  --f-num:  "Lato", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--sumi);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.8;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 920px; margin: 0 auto; padding: 0 20px 70px; }
+
+header.top { padding: 40px 0 6px; }
+
+.eyebrow {
+  font-family: var(--f-num);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.26em;
+  color: var(--hada);
+}
+
+h1 { font-family: var(--f-disp); font-size: clamp(26px, 5.4vw, 34px); margin: 8px 0 0; }
+.lead { color: var(--sumi-2); font-size: 13.5px; margin: 8px 0 0; }
+
+/* ---- 入口 ---- */
+
+.gate {
+  border: 2.5px solid var(--sumi);
+  border-radius: 20px 16px 22px 16px / 16px 20px 16px 22px;
+  box-shadow: 5px 6px 0 var(--sora-2);
+  padding: 22px 20px;
+  margin: 26px 0;
+  background: var(--paper);
+}
+
+.gate h2 { font-family: var(--f-disp); font-size: 19px; margin: 0 0 4px; }
+.gate p { font-size: 12.5px; color: var(--sumi-2); margin: 0 0 16px; }
+
+.field { margin-bottom: 14px; }
+
+.field label {
+  display: block;
+  font-size: 12.5px;
+  color: var(--sumi-2);
+  margin-bottom: 5px;
+  letter-spacing: 0.04em;
+}
+
+.field input {
+  width: 100%;
+  font-family: var(--f-body);
+  font-size: 15px;
+  color: var(--sumi);
+  background: var(--paper);
+  border: 2.5px solid var(--sumi);
+  border-radius: 12px;
+  padding: 11px 14px;
+  -webkit-appearance: none;
+}
+
+.field input:focus { outline: 3px solid var(--sora); outline-offset: 2px; background: #fffdf6; }
+
+.btn {
+  font-family: var(--f-disp);
+  font-size: 17px;
+  color: var(--sumi);
+  background: var(--ki);
+  border: 3px solid var(--sumi);
+  border-radius: 999px;
+  padding: 12px 28px;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--sumi);
+  transition: transform 0.14s, box-shadow 0.14s;
+}
+
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--sumi); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--sumi); }
+.btn:focus-visible { outline: 3px solid var(--sora); outline-offset: 3px; }
+
+.btn.ghost {
+  background: var(--paper);
+  font-family: var(--f-body);
+  font-size: 13.5px;
+  border-width: 2.5px;
+  padding: 9px 18px;
+  box-shadow: 3px 3px 0 var(--sora-2);
+}
+
+.msg { font-size: 13px; margin-top: 12px; }
+.msg.err { color: #b4413a; }
+
+/* ---- 数字 ---- */
+
+.nums {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin: 24px 0;
+}
+
+.num {
+  border: 2.5px solid var(--sumi);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: var(--paper);
+}
+
+.num b {
+  display: block;
+  font-family: var(--f-num);
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.num span { font-size: 12px; color: var(--sumi-3); }
+
+/* ---- 集計 ---- */
+
+h2.sec {
+  font-family: var(--f-disp);
+  font-size: 21px;
+  margin: 44px 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 3px solid var(--sumi);
+}
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+
+.block {
+  border: 2.5px solid var(--sumi);
+  border-radius: 16px;
+  padding: 16px 18px 18px;
+  background: var(--paper);
+  box-shadow: 4px 5px 0 var(--sora-2);
+}
+
+.block h3 { font-family: var(--f-disp); font-size: 16px; margin: 0 0 12px; }
+
+.bar-row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; margin-bottom: 9px; }
+.bar-label { font-size: 13px; line-height: 1.4; }
+.bar-val { font-family: var(--f-num); font-size: 13px; color: var(--sumi-2); font-variant-numeric: tabular-nums; }
+
+.bar-track {
+  grid-column: 1 / -1;
+  height: 12px;
+  border: 2px solid var(--sumi);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.bar-fill { display: block; height: 100%; background: var(--ki); }
+.bar-fill.alt { background: var(--hada-2); }
+.bar-fill.cool { background: var(--sora-2); }
+
+/* ---- 一覧 ---- */
+
+.table-wrap { overflow-x: auto; border: 2.5px solid var(--sumi); border-radius: 14px; }
+
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+
+th, td {
+  padding: 8px 11px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+  vertical-align: top;
+}
+
+th {
+  background: var(--paper-2);
+  font-weight: 700;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  position: sticky;
+  top: 0;
+}
+
+tbody tr:last-child td { border-bottom: 0; }
+td.wide { white-space: normal; min-width: 220px; }
+td.num { font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0; }
+
+.empty {
+  text-align: center;
+  color: var(--sumi-2);
+  padding: 40px 20px;
+  font-size: 14px;
+  line-height: 1.9;
+}
+
+footer.end {
+  margin-top: 56px;
+  padding-top: 18px;
+  border-top: 2px solid var(--line);
+  font-size: 12px;
+  color: var(--sumi-3);
+  line-height: 1.9;
+}
+
+footer.end a { color: var(--sumi-3); }
+[hidden] { display: none !important; }
+</style>
+
+<div class="wrap">
+
+<header class="top">
+  <div class="eyebrow">ADMIN</div>
+  <h1>さかさマッチメーカー 集計</h1>
+  <p class="lead">占ってくれた人の答えを、まとめて見るところ。占いの画面からはリンクしていません。</p>
+</header>
+
+<!-- ======================= 入口 ======================= -->
+<section class="gate" id="gate">
+  <h2>合言葉を入れてください</h2>
+  <p>Apps Script の <code>ADMIN_KEY</code> に設定した合言葉です。合っていないとデータは出てきません。</p>
+
+  <div class="field">
+    <label for="ep">記録先のURL（Apps Script のウェブアプリ）</label>
+    <input id="ep" type="url" placeholder="https://script.google.com/macros/s/……/exec" autocomplete="off" spellcheck="false">
+  </div>
+
+  <div class="field">
+    <label for="key">合言葉</label>
+    <input id="key" type="password" placeholder="ADMIN_KEY に設定したもの" autocomplete="off">
+  </div>
+
+  <button class="btn" id="load">集計を見る</button>
+  <p class="msg" id="msg"></p>
+</section>
+
+<!-- ======================= 集計 ======================= -->
+<section id="report" hidden>
+  <div class="nums" id="nums"></div>
+
+  <h2 class="sec">どんな物件が多いか</h2>
+  <div class="grid2" id="charts"></div>
+
+  <h2 class="sec">どこの物件か</h2>
+  <div class="grid2" id="places"></div>
+
+  <h2 class="sec">よく紹介された人</h2>
+  <div class="block" id="people"></div>
+
+  <h2 class="sec">ひとつずつ見る</h2>
+  <div class="tools">
+    <button class="btn ghost" id="csv">CSVで落とす</button>
+    <button class="btn ghost" id="reload">読み直す</button>
+    <span class="msg" id="count2"></span>
+  </div>
+  <div class="table-wrap"><table id="table"></table></div>
+</section>
+
+<footer class="end">
+  記録しているのは、ニックネーム（任意）・選んだ条件・結果に出た掲載者・日時・画面の大きさの区分だけです。<br>
+  氏名、連絡先、物件の所在地（市町村より細かいもの）、IPアドレス、端末の識別子は受け取っていません。<br>
+  <a href="https://okuhiko123.github.io/sakasa-matchmaker/">占いの画面へ</a>
+</footer>
+
+</div>
+
+<script>
+(function () {
+'use strict';
+
+var $ = function (id) { return document.getElementById(id); };
+var rows = [];
+
+// 質問の選択肢を、記号から日本語に戻すための対応表
+var LABEL = {
+  bldg: { kominka: '古い家・空き家', house: '一軒家・住宅', apart: 'マンション・一室',
+          tenant: '店舗・テナント', warehouse: '倉庫・工場・蔵', land: '土地・空き地' },
+  size: { s30: '〜30㎡', s60: '30〜60㎡', s100: '60〜100㎡', s200: '100〜200㎡', s999: '200㎡以上' },
+  rent: { r3: '〜3万円', r5: '3〜5万円', r10: '5〜10万円', r20: '10〜20万円', r99: '20万円以上', rx: '相談して決めたい' },
+  renov: { free: '好きにしていい', discuss: '相談してくれるなら', keep: 'なるべくこのまま' },
+  fire: { ok: 'かまわん', discuss: '内容による', ng: '難しい' },
+  live: { ok: '住んでいい', discuss: '相談可', ng: '住むのはなし' },
+  lively: { welcome: 'にぎやか歓迎', moderate: 'ほどほどなら', quiet: '静かに' },
+  sell: { sell: '売りたい気持ちも', maybe: '条件しだい', rent: '貸すだけ' },
+  wish: { open: '地域にひらく人', long: '長く続ける人', fun: '面白いことをする人', careful: '丁寧に使う人' }
+};
+
+var QNAME = {
+  bldg: '建物', size: '広さ', rent: '家賃', renov: '改装', fire: '飲食',
+  live: '住む', lively: 'にぎわい', sell: '売却', wish: 'どんな人に'
+};
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+/* --- JSONP で取りにいく（Apps Script は CORS を返さないため） --- */
+function jsonp(url, cb, onErr) {
+  var name = 'smcb' + Date.now() + Math.floor(Math.random() * 1000);
+  var timer = setTimeout(function () { cleanup(); onErr('時間切れです。URLが正しいか見てください。'); }, 20000);
+
+  function cleanup() {
+    clearTimeout(timer);
+    try { delete window[name]; } catch (e) { window[name] = undefined; }
+    if (tag.parentNode) tag.parentNode.removeChild(tag);
+  }
+
+  window[name] = function (data) { cleanup(); cb(data); };
+
+  var tag = document.createElement('script');
+  tag.src = url + (url.indexOf('?') < 0 ? '?' : '&') + 'callback=' + name;
+  tag.onerror = function () { cleanup(); onErr('つながりませんでした。URLを見直してください。'); };
+  document.head.appendChild(tag);
+}
+
+/* --- 集計 --- */
+
+function tally(key) {
+  var c = {};
+  rows.forEach(function (r) {
+    var v = r[key];
+    if (!v) { c['（答えなし）'] = (c['（答えなし）'] || 0) + 1; return; }
+    var name = (LABEL[key] && LABEL[key][v]) || v;
+    c[name] = (c[name] || 0) + 1;
+  });
+  return Object.keys(c).map(function (k) { return [k, c[k]]; })
+    .sort(function (a, b) { return b[1] - a[1]; });
+}
+
+function bars(pairs, cls, limit) {
+  var max = pairs.length ? pairs[0][1] : 1;
+  var list = limit ? pairs.slice(0, limit) : pairs;
+  var total = rows.length || 1;
+  return list.map(function (p) {
+    var pct = Math.round(p[1] / total * 100);
+    return '<div class="bar-row">' +
+      '<span class="bar-label">' + esc(p[0]) + '</span>' +
+      '<span class="bar-val">' + p[1] + '件 ' + pct + '%</span>' +
+      '<span class="bar-track"><span class="bar-fill ' + (cls || '') + '" style="width:' +
+        Math.max(Math.round(p[1] / max * 100), 3) + '%"></span></span>' +
+    '</div>';
+  }).join('') +
+  (pairs.length > list.length
+    ? '<p style="font-size:12px;color:var(--sumi-3);margin:10px 0 0">ほか ' + (pairs.length - list.length) + ' 件</p>'
+    : '');
+}
+
+function barBlock(title, pairs, cls, limit) {
+  return '<div class="block"><h3>' + esc(title) + '</h3>' + bars(pairs, cls, limit) + '</div>';
+}
+
+function render() {
+  if (!rows.length) {
+    $('report').hidden = false;
+    $('nums').innerHTML = '';
+    $('charts').innerHTML = '<p class="empty">まだ記録がありません。<br>誰かが占ってくれると、ここに溜まっていきます。</p>';
+    $('places').innerHTML = '';
+    $('people').innerHTML = '';
+    $('table').innerHTML = '';
+    $('count2').textContent = '';
+    return;
+  }
+
+  var times = rows.map(function (r) { return new Date(r.t); }).filter(function (d) { return !isNaN(d); });
+  var first = times.length ? new Date(Math.min.apply(null, times)) : null;
+  var last = times.length ? new Date(Math.max.apply(null, times)) : null;
+  var fmt = function (d) {
+    return d ? (d.getMonth() + 1) + '/' + d.getDate() + ' ' +
+      ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) : '—';
+  };
+
+  var withNick = rows.filter(function (r) { return r.nick; }).length;
+  var sp = rows.filter(function (r) { return r.dev && r.dev.indexOf('スマホ') >= 0; }).length;
+  var prefs = {};
+  rows.forEach(function (r) { if (r.pref) prefs[r.pref] = 1; });
+
+  $('nums').innerHTML = [
+    ['<b>' + rows.length + '</b><span>占った回数</span>'],
+    ['<b>' + Object.keys(prefs).length + '</b><span>都道府県</span>'],
+    ['<b>' + Math.round(withNick / rows.length * 100) + '%</b><span>名前を入れた人</span>'],
+    ['<b>' + Math.round(sp / rows.length * 100) + '%</b><span>スマホから</span>'],
+    ['<b style="font-size:17px">' + fmt(last) + '</b><span>最後に占われた</span>'],
+    ['<b style="font-size:17px">' + fmt(first) + '</b><span>最初の記録</span>']
+  ].map(function (x) { return '<div class="num">' + x + '</div>'; }).join('');
+
+  $('charts').innerHTML = ['bldg', 'size', 'rent', 'renov', 'fire', 'live', 'lively', 'sell', 'wish']
+    .map(function (k, i) { return barBlock(QNAME[k], tally(k), i % 3 === 1 ? 'alt' : (i % 3 === 2 ? 'cool' : ''), 8); })
+    .join('');
+
+  var cityPairs = tally('city').filter(function (p) { return p[0] !== '（答えなし）'; });
+  $('places').innerHTML =
+    barBlock('都道府県', tally('pref'), '', 12) +
+    barBlock('市町村（選んだ人のみ）', cityPairs.length ? cityPairs : [['選んだ人はまだいません', 0]], 'cool', 12);
+
+  // 結果に出た人を数える
+  var people = {};
+  rows.forEach(function (r) {
+    String(r.top || '').split(' / ').forEach(function (t) {
+      var name = t.replace(/\(\d+%\)\s*$/, '').trim();
+      if (name) people[name] = (people[name] || 0) + 1;
+    });
+  });
+  var pp = Object.keys(people).map(function (k) { return [k, people[k]]; })
+    .sort(function (a, b) { return b[1] - a[1]; });
+  $('people').innerHTML = pp.length
+    ? '<h3>紹介された回数（上位20人）</h3>' + bars(pp, 'alt', 20)
+    : '<p class="empty">まだありません。</p>';
+
+  var recent = rows.slice().reverse().slice(0, 200);
+  $('table').innerHTML =
+    '<thead><tr><th>日時</th><th>呼び名</th><th>場所</th><th>建物</th><th>広さ</th><th>家賃</th>' +
+    '<th>改装</th><th>飲食</th><th>住む</th><th>にぎわい</th><th>売却</th><th>どんな人に</th><th>結果</th><th>画面</th></tr></thead><tbody>' +
+    recent.map(function (r) {
+      var d = new Date(r.t);
+      var lb = function (k) { return (LABEL[k] && LABEL[k][r[k]]) || r[k] || '—'; };
+      return '<tr>' +
+        '<td class="num">' + (isNaN(d) ? esc(r.t) : fmt(d)) + '</td>' +
+        '<td>' + esc(r.nick || '—') + '</td>' +
+        '<td>' + esc(r.pref + (r.city ? ' ' + r.city : '')) + '</td>' +
+        ['bldg', 'size', 'rent', 'renov', 'fire', 'live', 'lively', 'sell', 'wish']
+          .map(function (k) { return '<td>' + esc(lb(k)) + '</td>'; }).join('') +
+        '<td class="wide">' + esc(r.top || '') + '</td>' +
+        '<td>' + esc(r.dev || '') + '</td>' +
+      '</tr>';
+    }).join('') + '</tbody>';
+
+  $('count2').textContent = rows.length > 200
+    ? '新しい200件を出しています（全' + rows.length + '件）'
+    : '全' + rows.length + '件';
+
+  $('report').hidden = false;
+}
+
+/* --- 読み込み --- */
+
+function load() {
+  var ep = $('ep').value.trim();
+  var key = $('key').value;
+  if (!ep || !key) { say('URLと合言葉の両方を入れてください。', true); return; }
+
+  say('読み込んでいます…', false);
+  $('load').disabled = true;
+
+  jsonp(ep + '?key=' + encodeURIComponent(key), function (data) {
+    $('load').disabled = false;
+    if (!data || !data.ok) {
+      say(data && data.error === 'key' ? '合言葉が違います。' : '読み込めませんでした。', true);
+      return;
+    }
+    rows = data.rows || [];
+    say('読み込みました（' + rows.length + '件）', false);
+    try {
+      sessionStorage.setItem('sm_ep', ep);
+      sessionStorage.setItem('sm_key', key);
+    } catch (e) { /* 使えない環境では覚えない */ }
+    render();
+  }, function (err) {
+    $('load').disabled = false;
+    say(err, true);
+  });
+}
+
+function say(m, isErr) {
+  var el = $('msg');
+  el.textContent = m;
+  el.className = 'msg' + (isErr ? ' err' : '');
+}
+
+$('load').onclick = load;
+$('reload').onclick = load;
+$('key').addEventListener('keydown', function (e) { if (e.key === 'Enter') load(); });
+
+$('csv').onclick = function () {
+  var head = ['日時', 'ニックネーム', '都道府県', '市町村', '建物', '広さ', '家賃', '改装', '飲食',
+              '住む', 'にぎわい', '売却', 'どんな人に', '結果', '画面'];
+  var q = function (v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; };
+  var body = rows.map(function (r) {
+    return [r.t, r.nick, r.pref, r.city, r.bldg, r.size, r.rent, r.renov, r.fire,
+            r.live, r.lively, r.sell, r.wish, r.top, r.dev].map(q).join(',');
+  });
+  var csv = '﻿' + head.map(q).join(',') + '\n' + body.join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'sakasa-matchmaker-log.csv';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+};
+
+// 同じタブで開き直したときだけ、入力を引き継ぐ
+try {
+  var ep0 = sessionStorage.getItem('sm_ep');
+  var key0 = sessionStorage.getItem('sm_key');
+  if (ep0) $('ep').value = ep0;
+  if (key0) { $('key').value = key0; load(); }
+} catch (e) { /* 使えない環境では何もしない */ }
+
+})();
+</script>

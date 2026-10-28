@@ -632,7 +632,7 @@ var pastShown = false;
 var busy = false;
 var footEl = document.querySelector('footer.foot');
 
-var SCREENS = ['screen-intro', 'screen-pref', 'screen-quiz', 'screen-divine', 'screen-result', 'screen-terms'];
+var SCREENS = ['screen-intro', 'screen-nick', 'screen-pref', 'screen-quiz', 'screen-divine', 'screen-result', 'screen-terms'];
 
 function show(id) {
   SCREENS.forEach(function (k) { $(k).classList.toggle('is-on', k === id); });
@@ -649,7 +649,7 @@ function dots(el, n, lit) {
   }
 }
 
-var TOTAL_STEPS = QUESTIONS.length + 3;
+var TOTAL_STEPS = QUESTIONS.length + 4;
 
 // その県の全市区町村（総務省のコード表）を、探している人が多い順に並べ替えて返す
 var cityCache = {};
@@ -684,11 +684,36 @@ function cityWanted(pref, city) {
   return false;
 }
 
+/* --- ニックネーム --- */
+
+function cleanNick(v) {
+  // 個人を特定しうるものは、こちらで落としてから先へ送る
+  return String(v || '')
+    .replace(/[\u0000-\u001f]/g, '')
+    .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, '')          // メールアドレス
+    .replace(/0\d{1,4}[-(]?\d{1,4}[-)]?\d{3,4}/g, '')       // 電話番号
+    .replace(/https?:\/\/\S+/gi, '')                        // URL
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 12);
+}
+
+function renderNick() {
+  dots($('progNick'), TOTAL_STEPS, 0);
+  $('nickInput').value = A.nick || '';
+  setFace('warm');
+  show('screen-nick');
+  $('nickBack').onclick = function () { show('screen-intro'); setFace('normal'); };
+  $('nickSkip').onclick = function () { A.nick = ''; renderRegion(); };
+  $('nickNext').onclick = function () { A.nick = cleanNick($('nickInput').value); renderRegion(); };
+  setTimeout(function () { try { $('nickInput').focus({ preventScroll: true }); } catch (e) {} }, 320);
+}
+
 /* --- エリア・都道府県 --- */
 
 function renderRegion() {
-  dots($('progPref'), TOTAL_STEPS, 0);
-  $('prefMurmur').textContent = 'さて。';
+  dots($('progPref'), TOTAL_STEPS, 1);
+  $('prefMurmur').textContent = A.nick ? A.nick + 'さんね。' : 'さて。';
   $('prefQuestion').textContent = 'その物件、どのあたりにあるの？';
   $('prefHint').textContent = 'エリアを選ぶ';
   var g = $('prefGrid');
@@ -702,13 +727,13 @@ function renderRegion() {
     b.onclick = function () { pickedRegion = r; renderPref(); };
     g.appendChild(b);
   });
-  $('prefBack').onclick = function () { show('screen-intro'); setFace('normal'); };
+  $('prefBack').onclick = renderNick;
   setFace('normal');
   show('screen-pref');
 }
 
 function renderPref() {
-  dots($('progPref'), TOTAL_STEPS, 1);
+  dots($('progPref'), TOTAL_STEPS, 2);
   $('prefMurmur').textContent = 'お、' + pickedRegion[0] + 'ね。';
   $('prefQuestion').textContent = 'もうちょい詳しく聞くね。';
   $('prefHint').textContent = pickedRegion[0] + 'エリアの中から';
@@ -740,7 +765,7 @@ function renderCity() {
   if (cityPage < 0) cityPage = 0;
   var slice = list.slice(cityPage * CITY_PER_PAGE, (cityPage + 1) * CITY_PER_PAGE);
 
-  dots($('progPref'), TOTAL_STEPS, 2);
+  dots($('progPref'), TOTAL_STEPS, 3);
   $('prefMurmur').textContent = A.pref + 'ね。';
   $('prefQuestion').textContent = 'もっと近いところで探す？';
   var hotHere = slice.filter(function (c) { return cityWanted(A.pref, c); }).length;
@@ -795,7 +820,7 @@ function renderCity() {
 
 function renderQ() {
   var q = QUESTIONS[qi];
-  dots($('prog'), TOTAL_STEPS, qi + 3);
+  dots($('prog'), TOTAL_STEPS, qi + 4);
   $('qMurmur').textContent = q.murmur || '';
   $('qMurmur').style.display = q.murmur ? '' : 'none';
   $('qText').textContent = q.q;
@@ -861,6 +886,11 @@ var RESULT_LINES = [
   'オレの見立てだと、この人。',
   'その物件、こう使われるとみた。'
 ];
+
+function resultLine() {
+  var base = RESULT_LINES[(Math.random() * RESULT_LINES.length) | 0];
+  return A.nick ? A.nick + 'さん、' + base : base;
+}
 
 
 function startDivine() {
@@ -1009,7 +1039,8 @@ function renderResult() {
   $('btnMore').style.display = pool.length > n ? '' : 'none';
   $('btnMore').textContent = 'ほかの候補も見る（あと' + (pool.length - n) + '人）';
 
-  $('resultBubble').textContent = RESULT_LINES[(Math.random() * RESULT_LINES.length) | 0];
+  $('resultBubble').textContent = resultLine();
+  sendLog(pool, n);
   renderRecap();
   show('screen-result');
   setFace('grin');
@@ -1091,7 +1122,9 @@ function card(r, idx, isPast) {
 }
 
 function renderRecap() {
-  var labels = ['場所：' + A.pref + (A.cityWord ? ' ' + A.cityWord : '')];
+  var labels = [];
+  if (A.nick) labels.push('呼び名：' + A.nick);
+  labels.push('場所：' + A.pref + (A.cityWord ? ' ' + A.cityWord : ''));
   QUESTIONS.forEach(function (q) {
     var v = A[q.id];
     if (!v) return;
@@ -1099,6 +1132,43 @@ function renderRecap() {
     if (o) labels.push((q.label || '') + '：' + o.l);
   });
   $('recap').innerHTML = '<b>あなたの答え</b><br>' + labels.map(esc).join('　/　');
+}
+
+/* --- 占った記録を送る -----------------------------------------------
+   送るのは「どんな条件で占って、誰が出たか」だけ。
+   氏名・連絡先・住所・IP・端末の識別子は一切つくらず、送らない。
+------------------------------------------------------------------- */
+
+var logged = false;
+
+function sendLog(pool, n) {
+  var url = (window.SM_CONFIG || {}).logEndpoint;
+  if (!url || logged) return;
+  logged = true;
+
+  var body = {
+    v: 1,
+    nick: A.nick || '',
+    pref: A.pref || '',
+    city: A.cityWord || '',
+    bldg: A.bldg || '', size: A.size || '', rent: A.rent || '',
+    renov: A.renov || '', fire: A.fire || '', live: A.live || '',
+    lively: A.lively || '', sell: A.sell || '', wish: A.wish || '',
+    top: pool.slice(0, n).map(function (r) {
+      return { s: r.x.s, n: r.x.n, p: Math.max(46, Math.min(97, Math.round(40 + (r.s / MAX_SCORE) * 58))) };
+    }),
+    dev: innerWidth < 768 ? 'sp' : 'pc'
+  };
+
+  try {
+    // text/plain にして、よけいな事前確認の通信を起こさない
+    fetch(url, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(body)
+    }).catch(function () {});
+  } catch (e) { /* 送れなくても占いは続ける */ }
 }
 
 /* --- 小物 --- */
@@ -1182,6 +1252,7 @@ function pokeOkuda() {
 /* --- 起動 --- */
 
 mountGenie($('genieIntro'));
+mountGenie($('genieNick'));
 mountGenie($('geniePref'));
 mountGenie($('genie'));
 mountGenie($('genieDivine'));
@@ -1198,10 +1269,11 @@ $('genieIntro').addEventListener('mouseenter', function () {
 $('btnStart').onclick = function () {
   A = {};
   pickedRegion = null;
+  logged = false;
   $('introSpeech').classList.remove('on');
-  renderRegion();
+  renderNick();
   if (reduceMotion) return;
-  ['geniePref', 'genie'].forEach(function (id) {
+  ['genieNick', 'geniePref', 'genie'].forEach(function (id) {
     var g = $(id);
     g.classList.remove('arrive');
     void g.offsetWidth;
@@ -1214,7 +1286,7 @@ $('screen-quiz').addEventListener('click', function (e) {
   if (busy && !e.target.closest('.btn')) finishReaction();
 });
 
-$('btnAgain').onclick = function () { A = {}; shown = 0; show('screen-intro'); setFace('normal'); };
+$('btnAgain').onclick = function () { A = {}; shown = 0; logged = false; show('screen-intro'); setFace('normal'); };
 $('btnMore').onclick = function () { renderResult(); };
 $('btnPast').onclick = showPast;
 

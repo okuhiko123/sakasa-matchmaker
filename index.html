@@ -30,6 +30,27 @@
     <p class="intro-meta"><b id="introCount">400</b> 名以上の掲載者から診断します</p>
   </section>
 
+  <!-- ======================= ニックネーム ======================= -->
+  <section class="screen" id="screen-nick">
+    <div class="progress" id="progNick" aria-hidden="true"></div>
+    <div class="char-wrap">
+      <div class="bubble"><span class="murmur">はじめまして。</span><span>なんて呼べばいい？</span></div>
+      <svg class="genie" id="genieNick" viewBox="0 0 280 348" role="img" aria-label="占い師オクダーマン"></svg>
+    </div>
+    <div class="q-body">
+      <div class="nick-field">
+        <label class="nick-label" for="nickInput">ニックネーム</label>
+        <input id="nickInput" type="text" maxlength="12" placeholder="たとえば「大家のタロー」" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go">
+        <p class="nick-note">本名じゃなくていいよ。電話番号やメールアドレス、物件の住所は書かんといてね。</p>
+      </div>
+      <button class="btn-primary sm" id="nickNext">これで進む</button>
+      <div class="q-foot">
+        <button class="linkish" id="nickBack">← もどる</button>
+        <button class="linkish" id="nickSkip">名前なしで進む →</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ======================= 場所 ======================= -->
   <section class="screen" id="screen-pref">
     <div class="progress" id="progPref" aria-hidden="true"></div>
@@ -122,8 +143,21 @@
         <li>「物件が見つかりました」「募集を終了しました」と表示される方は、現在は物件を探していません。参考としてご覧ください。</li>
       </ul>
 
-      <h3>3. ご入力いただいた内容</h3>
-      <p>質問への回答は、お使いの端末の中だけで処理しています。サーバーへの送信・保存・第三者への提供は行っていません。物件の住所や個人を特定できる情報の入力は求めていません。</p>
+      <h3>3. ご入力いただいた内容と、その記録について</h3>
+      <p>占いそのものは、お使いの端末の中だけで計算しています。そのうえで、サービスを良くするために、次の内容だけを運営者が記録しています。</p>
+      <ul>
+        <li>ニックネーム（任意。入力しなくても占えます）</li>
+        <li>質問への回答（エリア・市町村・建物・広さ・家賃など、選んでいただいた選択肢）</li>
+        <li>占いの結果として表示された掲載者</li>
+        <li>記録した日時と、画面の大きさの区分（スマートフォン／パソコン）</li>
+      </ul>
+      <p>記録しないもの：</p>
+      <ul>
+        <li>氏名・住所・電話番号・メールアドレスなど、個人を特定できる情報。そもそもお尋ねしていません。</li>
+        <li>物件の所在地（市町村より細かい情報）。お尋ねしていません。</li>
+        <li>IPアドレス、端末の識別子、閲覧履歴、Cookieによる追跡。</li>
+      </ul>
+      <p>ニックネームは自由入力です。本名やご連絡先の入力はお控えください。記録は集計してサービスの改善に使うもので、第三者に提供・販売することはありません。</p>
 
       <h3>4. 免責</h3>
       <p>本サービスの利用、または利用できなかったことによって生じた損害について、運営者は責任を負いかねます。掲載者とのやりとりや契約に関するトラブルについても、当事者間で解決いただくものとします。</p>
@@ -170,6 +204,7 @@
 
 <div class="toast" id="toast"></div>
 
+<script src="config.js" charset="utf-8"></script>
 <script src="muni.js" charset="utf-8"></script>
 <script src="data.js" charset="utf-8"></script>
 <script src="app.js" charset="utf-8"></script>
