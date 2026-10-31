@@ -5,5 +5,5 @@
    作り方は gas/README.md を見てください。
 --------------------------------------------------------------------------- */
 window.SM_CONFIG = {
-  logEndpoint: ''
+  logEndpoint: 'https://script.google.com/macros/s/AKfycbxdXRmOHcJcTLy2b88ADvPWrCKAmK8W742ylS6NEABUCRDfDecgZp4qOyW0mzBcuZql/exec'
 };
