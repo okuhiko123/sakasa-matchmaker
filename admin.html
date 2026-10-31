@@ -248,7 +248,7 @@ footer.end a { color: var(--sumi-3); }
   <p>Apps Script の <code>ADMIN_KEY</code> に設定した合言葉です。合っていないとデータは出てきません。</p>
 
   <div class="field">
-    <label for="ep">記録先のURL（Apps Script のウェブアプリ）</label>
+    <label for="ep">記録先のURL（ふつうは入力済み。空のときだけ入れる）</label>
     <input id="ep" type="url" placeholder="https://script.google.com/macros/s/……/exec" autocomplete="off" spellcheck="false">
   </div>
 
@@ -291,6 +291,7 @@ footer.end a { color: var(--sumi-3); }
 
 </div>
 
+<script src="config.js" charset="utf-8"></script>
 <script>
 (function () {
 'use strict';
@@ -519,7 +520,7 @@ $('csv').onclick = function () {
 
 // 同じタブで開き直したときだけ、入力を引き継ぐ
 try {
-  var ep0 = sessionStorage.getItem('sm_ep');
+  var ep0 = sessionStorage.getItem('sm_ep') || (window.SM_CONFIG || {}).logEndpoint;
   var key0 = sessionStorage.getItem('sm_key');
   if (ep0) $('ep').value = ep0;
   if (key0) { $('key').value = key0; load(); }
