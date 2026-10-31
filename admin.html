@@ -245,7 +245,7 @@ footer.end a { color: var(--sumi-3); }
 <!-- ======================= 入口 ======================= -->
 <section class="gate" id="gate">
   <h2>合言葉を入れてください</h2>
-  <p>Apps Script の <code>ADMIN_KEY</code> に設定した合言葉です。合っていないとデータは出てきません。</p>
+  <p>Apps Script の <code>ADMIN_KEYS</code> に入れた合言葉です。合っていないとデータは出てきません。</p>
 
   <div class="field" id="epField" hidden>
     <label for="ep">記録先のURL（Apps Script のウェブアプリ）</label>
@@ -254,7 +254,7 @@ footer.end a { color: var(--sumi-3); }
 
   <div class="field">
     <label for="key">合言葉</label>
-    <input id="key" type="password" placeholder="ADMIN_KEY に設定したもの" autocomplete="off">
+    <input id="key" type="password" placeholder="ADMIN_KEYS に入れたもの" autocomplete="off">
   </div>
 
   <button class="btn" id="load">集計を見る</button>

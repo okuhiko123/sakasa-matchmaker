@@ -8,8 +8,8 @@
  * 使い方は同じフォルダの README.md を見てください。
  */
 
-// ▼ ここを好きな合言葉に変えてください（管理画面で入力するもの）
-var ADMIN_KEY = 'change-me';
+// ▼ 管理画面で入力する合言葉。いくつ並べてもよい（どれでも入れる）
+var ADMIN_KEYS = ['change-me'];
 
 var SHEET_NAME = 'log';
 
@@ -68,7 +68,7 @@ function doGet(e) {
   var p = (e && e.parameter) || {};
   var cb = p.callback;
 
-  if (p.key !== ADMIN_KEY) {
+  if (ADMIN_KEYS.indexOf(p.key) < 0) {
     return jsonp_(cb, { ok: false, error: 'key' });
   }
 
