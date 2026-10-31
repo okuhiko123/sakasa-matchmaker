@@ -247,8 +247,8 @@ footer.end a { color: var(--sumi-3); }
   <h2>合言葉を入れてください</h2>
   <p>Apps Script の <code>ADMIN_KEY</code> に設定した合言葉です。合っていないとデータは出てきません。</p>
 
-  <div class="field">
-    <label for="ep">記録先のURL（ふつうは入力済み。空のときだけ入れる）</label>
+  <div class="field" id="epField" hidden>
+    <label for="ep">記録先のURL（Apps Script のウェブアプリ）</label>
     <input id="ep" type="url" placeholder="https://script.google.com/macros/s/……/exec" autocomplete="off" spellcheck="false">
   </div>
 
@@ -463,10 +463,20 @@ function render() {
 
 /* --- 読み込み --- */
 
+function endpoint() {
+  // config.js の値が正。無いときだけ手入力を見る
+  return ((window.SM_CONFIG || {}).logEndpoint || $('ep').value || '').trim();
+}
+
 function load() {
-  var ep = $('ep').value.trim();
+  var ep = endpoint();
   var key = $('key').value;
-  if (!ep || !key) { say('URLと合言葉の両方を入れてください。', true); return; }
+  if (!ep) { say('記録先のURLが分かりません。config.js を確認してください。', true); return; }
+  if (!/^https:\/\/script\.google\.com\/macros\//.test(ep)) {
+    say('記録先のURLが違います。script.google.com/macros/… の形のものを入れてください。', true);
+    return;
+  }
+  if (!key) { say('合言葉を入れてください。', true); return; }
 
   say('読み込んでいます…', false);
   $('load').disabled = true;
@@ -480,7 +490,6 @@ function load() {
     rows = data.rows || [];
     say('読み込みました（' + rows.length + '件）', false);
     try {
-      sessionStorage.setItem('sm_ep', ep);
       sessionStorage.setItem('sm_key', key);
     } catch (e) { /* 使えない環境では覚えない */ }
     render();
@@ -518,11 +527,15 @@ $('csv').onclick = function () {
   setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 };
 
-// 同じタブで開き直したときだけ、入力を引き継ぐ
+// config.js に記録先が無いときだけ、URL欄を出す
+if (!(window.SM_CONFIG || {}).logEndpoint) {
+  $('epField').hidden = false;
+}
+
+// 同じタブで開き直したときだけ、合言葉を引き継ぐ
 try {
-  var ep0 = sessionStorage.getItem('sm_ep') || (window.SM_CONFIG || {}).logEndpoint;
+  sessionStorage.removeItem('sm_ep');   // 古い版が覚えた間違ったURLを捨てる
   var key0 = sessionStorage.getItem('sm_key');
-  if (ep0) $('ep').value = ep0;
   if (key0) { $('key').value = key0; load(); }
 } catch (e) { /* 使えない環境では何もしない */ }
 
